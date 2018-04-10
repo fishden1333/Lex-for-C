@@ -27,8 +27,8 @@ PUNC [:;,.\[\](){}]
 INTEGER 0|[1-9]{DIGIT}*
 DOUBLE {DIGIT}*\.{DIGIT}+|{DIGIT}+\.{DIGIT}*
 SCI {DIGIT}+[eE][+-]?{DIGIT}+|{DOUBLE}[eE][+-]?{DIGIT}+
-CHAR '([^\\'])'
-STRING \"([^"]|\\\")*\"
+CHAR '([^'])?'
+STRING \"([^"])*\"|\"\"
 WHITESPACE [ \t]+
 
 %%
@@ -41,6 +41,7 @@ WHITESPACE [ \t]+
                     print(noth);}
 "#pragma token off" {tokenOn = false;
                      print(noth);}
+"#pragma". {print(error);}
 
 "/*" {inComment = true;
       mulComment = true;
@@ -127,6 +128,8 @@ WHITESPACE [ \t]+
 "||" {print(op);}
 {OP} {print(op);}
 
+{DOUBLE}{DOUBLE}+ {print(error);}
+
 {INTEGER} {print(integer);}
 
 {DOUBLE} {print(doub);}
@@ -139,17 +142,16 @@ WHITESPACE [ \t]+
 
 {STRING} {print(str);}
 
-{WHITESPACE} {print(noth);}
-
-'\" {print(noth);}
+{DIGIT}[a-zA-Z0-9]+ {print(error);}
+{DIGIT}+[eE][+-]?[a-zA-Z]+|{DOUBLE}[eE][+-]?[a-zA-Z]+ {print(error);}
 
 \n {inComment = (mulComment == true) ? true : false;
     mulComment = (inComment == 1) ? true : false;
     print(nl);
     strcpy(line, "");}
 
-{DIGIT}[a-zA-Z0-9]+ {print(error);}
-
+{WHITESPACE} {print(noth);}
+'\" {print(noth);}
 . {print(error);}
 
 %%
@@ -157,10 +159,7 @@ WHITESPACE [ \t]+
 int main(int argc, char **argv)
 {
   yyin = fopen(argv[1], "r"); // Input file
-  yyout = fopen("output.out", "w"); // Output file
   yylex();
-  fclose(yyin);
-  fclose(yyout);
   return 0;
 }
 
@@ -176,7 +175,7 @@ void print(Type type)
     case key:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        fprintf(yyout, "#key:%s\n", yytext);
+        printf("#key:%s\n", yytext);
       }
       strcat(line, yytext);
       break;
@@ -184,7 +183,7 @@ void print(Type type)
     case id:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        fprintf(yyout, "#id:%s\n", yytext);
+        printf("#id:%s\n", yytext);
       }
       strcat(line, yytext);
       break;
@@ -192,7 +191,7 @@ void print(Type type)
     case op:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        fprintf(yyout, "#op:%s\n", yytext);
+        printf("#op:%s\n", yytext);
       }
       strcat(line, yytext);
       break;
@@ -200,7 +199,7 @@ void print(Type type)
     case punc:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        fprintf(yyout, "#punc:%s\n", yytext);
+        printf("#punc:%s\n", yytext);
       }
       strcat(line, yytext);
       break;
@@ -208,7 +207,7 @@ void print(Type type)
     case integer:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        fprintf(yyout, "#integer:%s\n", yytext);
+        printf("#integer:%s\n", yytext);
       }
       strcat(line, yytext);
       break;
@@ -216,7 +215,7 @@ void print(Type type)
     case doub:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        fprintf(yyout, "#double:%s\n", yytext);
+        printf("#double:%s\n", yytext);
       }
       strcat(line, yytext);
       break;
@@ -224,7 +223,7 @@ void print(Type type)
     case ch:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        fprintf(yyout, "#char:%s\n", yytext);
+        printf("#char:%s\n", yytext);
       }
       strcat(line, yytext);
       break;
@@ -232,7 +231,7 @@ void print(Type type)
     case sci:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        fprintf(yyout, "#sci:%s\n", yytext);
+        printf("#sci:%s\n", yytext);
       }
       strcat(line, yytext);
       break;
@@ -240,10 +239,10 @@ void print(Type type)
     case str:
       if (inComment == false && inError == false && tokenOn == true)
       {
-        char printStr[yyleng - 1];
+        char printStr[1000];
         strncpy(printStr, yytext + 1, yyleng - 2);
-        printStr[yyleng - 1] = '\0';
-        fprintf(yyout, "#string:%s\n", printStr);
+        printStr[yyleng - 2] = '\0';
+        printf("#string:%s\n", printStr);
       }
       strcat(line, yytext);
       break;
@@ -251,7 +250,7 @@ void print(Type type)
     case nl:
       if (inError == false && sourceOn == true)
       {
-        fprintf(yyout, "%d:%s\n", ++numLines, line);
+        printf("%d:%s\n", ++numLines, line);
         break;
       }
       else if (inError == false && sourceOn == false)
