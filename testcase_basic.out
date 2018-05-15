@@ -35,7 +35,7 @@
 #key:ftell
 #key:fwrite
 #key:remove
-3:fclose clearerr feof ferror fflush fgetpos fopen fread freopen fseek fsetpos ftell fwrite remove 
+3:fclose clearerr feof ferror fflush fgetpos fopen fread freopen fseek fsetpos ftell fwrite remove
 #key:rename
 #key:rewind
 #key:setbuf
@@ -100,7 +100,7 @@
 #integer:4
 #integer:567
 #integer:8910
-8:1 2 3 4 567 8910  
+8:1 2 3 4 567 8910
 #double:2.3
 #double:3.3
 #double:55.1

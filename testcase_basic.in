@@ -7,9 +7,7 @@ scanf sscanf fgetc fgets fputc fputs getc getchar gets putc putchar puts ungetc 
 : ; , . [] () {}
 1 2 3 4 567 8910
 2.3 3.3 55.1 0.2 0.8888 .2323
-3e7 00123E+07 12.e07 .123E-01 00.123e-1
 'a' 'b' 'c' 'd' 'z' '@' '#'
 Please make sure your output format is correct or you will receive zero credit
 You have been warned
 Seriously
-"// " "sdfew esf, dsf." "\n"

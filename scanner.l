@@ -144,6 +144,7 @@ WHITESPACE [ \t]+
 
 {DIGIT}[a-zA-Z0-9]+ {print(error);}
 {DIGIT}+[eE][+-]?[a-zA-Z]+|{DOUBLE}[eE][+-]?[a-zA-Z]+ {print(error);}
+{ID}@+ {print(error);}
 
 \n {inComment = (mulComment == true) ? true : false;
     mulComment = (inComment == 1) ? true : false;
@@ -255,11 +256,12 @@ void print(Type type)
       }
       else if (inError == false && sourceOn == false)
       {
+        ++numLines;
         break;
       }
       else if (inError == true)
       {
-        fprintf(stderr, "Error at line %d:%s\n", ++numLines, line);
+        fprintf(stderr, "Error at line %d: %s\n", ++numLines, line);
         exit(1);
       }
       else
@@ -278,8 +280,15 @@ void print(Type type)
       }
       else
       {
-        inError = true;
-        strcpy(line, yytext);
+        if (inError == false)
+        {
+          inError = true;
+          strcpy(line, yytext);
+        }
+        else
+        {
+          strcat(line, yytext);
+        }
       }
   }
 }
